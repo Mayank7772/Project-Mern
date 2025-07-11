@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 dotenv.config();
 
+const userRoute = require('./routes/user.route');
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO).then(() => {
     console.log('Connected to MongoDB');
@@ -15,3 +17,5 @@ const app = express();
 app.listen(3000, () => {
   console.log('Server is running on http://localhost:3000');
 });
+
+app.use('/api/user', userRoute);
