@@ -8,7 +8,8 @@ import Footer from './Footer'
 
 const Home = () => {
   return (
-    <div>
+    <div className='w-full overflow-hidden'>
+      <Header/>
       <About/>
       <Projects />
       <Testimonials />

@@ -14,9 +14,6 @@ const App = () => {
       
       <BrowserRouter>
         <ToastContainer/>
-         <div className='w-full overflow-hidden'>
-           <Header/>
-          </div>
         <Routes>
           <Route path='/' element={<Home/>} />
           <Route path='/sign-in' element={<SignIn />} />
