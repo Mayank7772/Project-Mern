@@ -33,6 +33,8 @@ const signin = async (req, res, next) => {
         const token = jwt.sign({id : validUser._id} , process.env.JWT_SECRET);
          // id from mongoose model
         const { password:pass ,  ...rest } = validUser._doc; // Exclude password from the response
+        // _doc is used to get the plain object representation of the document
+        // res.cookie is used to set a cookie in the response
         res.cookie("access_token", token , {httpOnly : true} )
         .status(200)
         .json(rest); // Send the user data without the password
