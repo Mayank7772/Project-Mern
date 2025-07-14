@@ -14,7 +14,11 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
-    },  
+    },
+    avatar : {
+        type : String,
+        default : "https://www.headshotpro.com/avatar-results/random-1.webp"
+    }
 }, { timestamps: true });
 
 const User  = mongoose.model('User' , userSchema);
