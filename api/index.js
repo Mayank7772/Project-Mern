@@ -6,6 +6,7 @@ dotenv.config();
 const userRoute = require('./routes/user.route');
 const authRoute = require('./routes/auth.route');
 
+const cookieParser = require('cookie-parser');
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO).then(() => {
@@ -17,6 +18,9 @@ mongoose.connect(process.env.MONGO).then(() => {
 const app = express();
 
 app.use(express.json()); // Middleware to parse JSON bodies
+
+app.use(cookieParser()); // Middleware to parse cookies
+
 
 app.listen(3000, () => {
   console.log('Server is running on http://localhost:3000');
