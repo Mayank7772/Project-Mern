@@ -4,8 +4,12 @@ import menu_icon from '../assets/menu_icon.svg'
 import cross_icon from '../assets/cross_icon.svg'
 import { FaSearch } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
+import {useSelector} from 'react-redux'
 const Navbar = () => {
+
     const [isOpen, setIsOpen] = useState(false);
+    const currentUser = useSelector((state) => state.user.currentUser);
+    
   return (
     <div className='absolute top-0 left-0 w-full z-10'>
         <div className='container mx-auto flex justify-between items-center
@@ -36,10 +40,19 @@ const Navbar = () => {
                 <input type="text" placeholder='Search...' className='focus:outline-none'/>
                 <FaSearch className='text-slate-600 '/>
             </form>
-            <button   className=' md:block bg-white px-8 py-2
-            rounded-full'><Link to='/sign-in' >
-            Sign In
-            </Link>  </button>
+            {
+                currentUser ? (
+                    <Link to='/profile' className='flex items-center mx-2'>
+                        <img src={currentUser.avatar} alt="profile" className='w-10 h-10 rounded-full cursor-pointer' />
+                    </Link>
+                ) : (
+                    <Link to='/sign-in' className=' flex items-center  bg-white px-8 py-2 mx-2
+                    rounded-full hover:bg-gray-200'>
+                        Signin
+                    </Link>
+                )
+
+            }
             <img  onClick={ ()=> setIsOpen(true)}src={menu_icon} className='md:hidden w-7 cursor-pointer' alt=''/>
             {/*------------mobile-menu-----*/}
             <div className={` md:hidden  ${isOpen ? 'fixed w-full' : 'h-0 w-0'} right-0 top-0 bottom-0
