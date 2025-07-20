@@ -1,66 +1,139 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { useRef } from "react";
+import {getDownloadURL, getStorage, ref, uploadBytesResumable} from "firebase/storage";
+import { app } from "../firebase"; // Adjust the import path as necessary
+
 export default function Profile() {
-  const {currentUser} = useSelector((state) => state.user);
+  const { currentUser } = useSelector((state) => state.user);
+  const fileRef = useRef(null);
+  const [file, setFile] = useState(undefined);
+  const [filePercent, setFilePercent] = useState(0);
+  const [fileUploadError, setfileUploadError] = useState(false);
+  const [formData, setformData] = useState({});
+ 
+  useEffect(() => {
+    if(file){
+      hadleFileUpload(file);
+    }
+  }, [file]);
+
+  // Function to handle file upload
+  // This function uploads the file to Firebase Storage and tracks the upload progress
+  const hadleFileUpload = async (file) => {
+    const storage = getStorage(app);
+    const fileName = new Date().getTime() + file.name;
+    const storageRef = ref(storage, fileName);
+    // Here you would typically upload the file to Firebase Storage
+    const uploadTask = uploadBytesResumable(storageRef, file);
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        // Handle progress, pause, and resume
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setFilePercent(Math.round(progress));
+      },
+      (error) => {
+        // Handle unsuccessful uploads
+        setfileUploadError(true);
+      },
+      () => {
+        // Handle successful uploads on complete
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+        setformData({...formData , avatar : downloadURL});
+        });
+        console.log("File uploaded successfully");
+      } 
+    );
+  }
   return (
-    <div className='container mx-auto mt-10 max-w-md p-6 bg-white rounded shadow'>
-      <h1 className='text-3xl font-bold text-center mb-6'>Profile</h1>
-      
-      <form className='space-y-4'>
-        <div className='flex flex-col items-center mb-6'>
+    <div className="container mx-auto mt-10 max-w-md p-6 bg-white rounded shadow">
+      <h1 className="text-3xl font-bold text-center mb-6">Profile</h1>
+      <form className="space-y-4">
+        <input
+        onChange={(e) => setFile(e.target.files[0])}
+         type="file" 
+         ref={fileRef} 
+         hidden 
+         accept="image/*" />
+        <div className="flex flex-col items-center mb-6">
           <img
-            src={currentUser.avatar }
-            alt='Avatar'
-            className='w-24 h-24 rounded-full mb-4'
+            onClick={() => fileRef.current.click()}
+            src={formData.avatar ||  currentUser.avatar}
+            alt="Avatar"
+            className="w-24 h-24 rounded-full mb-4 cursor-pointer"
           />
-       </div>
+          <p className="text-sm self-center">
+            {
+              fileUploadError 
+              ?
+              <span className="text-red-500">Error uploading file(image  must be less than 2 mb)</span>
+              :
+              (
+                (filePercent > 0 && filePercent < 100)
+              ? <span className="text-blue-500">Uploading: {filePercent}% </span>
+              : 
+              (
+                filePercent === 100 ? <span className="text-green-500"> Upload complete </span>
+                : ""
+              )
+              )
+             }
+          </p>
+        </div>
         <div>
-          <label className='block text-sm font-medium mb-1' htmlFor='username'>Username</label>
+          <label className="block text-sm font-medium mb-1" htmlFor="username">
+            Username
+          </label>
           <input
-            type='text'
-            id='username'
-            className='w-full border rounded px-3 py-2 focus:outline-none focus:ring'
-            placeholder='Enter your username'
+            type="text"
+            id="username"
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring"
+            placeholder="Enter your username"
             value={currentUser.username}
           />
         </div>
         <div>
-          <label className='block text-sm font-medium mb-1' htmlFor='email'>Email</label>
+          <label className="block text-sm font-medium mb-1" htmlFor="email">
+            Email
+          </label>
           <input
-            type='email'
-            id='email'
-            className='w-full border rounded px-3 py-2 focus:outline-none focus:ring'
-            placeholder='Enter your email'
+            type="email"
+            id="email"
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring"
+            placeholder="Enter your email"
             value={currentUser.email}
           />
         </div>
         <div>
-          <label className='block text-sm font-medium mb-1' htmlFor='password'>Password</label>
+          <label className="block text-sm font-medium mb-1" htmlFor="password">
+            Password
+          </label>
           <input
-            type='password'
-            id='password'
-            className='w-full border rounded px-3 py-2 focus:outline-none focus:ring'
-            placeholder='Enter your password'
-
+            type="password"
+            id="password"
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring"
+            placeholder="Enter your password"
           />
         </div>
         <button
-          type='submit'
-          className='w-full  bg-slate-700 text-white py-2 rounded uppercase hover:bg-blue-700'
+          type="submit"
+          className="w-full  bg-slate-700 text-white py-2 rounded uppercase hover:bg-blue-700"
         >
           Update Profile
         </button>
       </form>
-      <div className='flex justify-between mt-5'>
-        <div className='flex gap-3'>
-          <span className=' bg-red-700  cursor-pointer outline-none rounded p-2' >
+      <div className="flex justify-between mt-5">
+        <div className="flex gap-3">
+          <span className=" bg-red-700  cursor-pointer outline-none rounded p-2">
             Delete Account
           </span>
-          <span className=' bg-yellow-700  cursor-pointer outline-none rounded p-2' >
+          <span className=" bg-yellow-700  cursor-pointer outline-none rounded p-2">
             Sign Out
           </span>
         </div>
       </div>
     </div>
-  )
+  );
 }
+
