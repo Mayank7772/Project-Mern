@@ -1,17 +1,21 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useRef } from "react";
 import {getDownloadURL, getStorage, ref, uploadBytesResumable} from "firebase/storage";
 import { app } from "../firebase"; // Adjust the import path as necessary
-
+import { updateUserStart,updateUsersuccess,updateUserFailure } from "../redux/user/userSlice";
+import { useDispatch } from "react-redux";
+// Import necessary actions from your Redux slice
 export default function Profile() {
-  const { currentUser } = useSelector((state) => state.user);
+  const { currentUser,loading ,error } = useSelector((state) => state.user);
   const fileRef = useRef(null);
   const [file, setFile] = useState(undefined);
   const [filePercent, setFilePercent] = useState(0);
   const [fileUploadError, setfileUploadError] = useState(false);
   const [formData, setformData] = useState({});
- 
+  const [updateSuccess , setupdateSuccess] = useState(false);
+  const dispatch = useDispatch();
+  
   useEffect(() => {
     if(file){
       hadleFileUpload(file);
@@ -46,10 +50,40 @@ export default function Profile() {
       } 
     );
   }
+
+  const handleChange = (e) =>{
+    setformData({...formData , [e.target.id] : e.target.value});
+  }
+
+
+  // Function to handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try{
+      dispatch(updateUserStart());
+      const res = await fetch(`/api/user/update/${currentUser._id}`, {
+        method:'POST',
+        headers:{
+          'Content-Type' : 'application/json',
+        },
+        body:JSON.stringify(formData)
+      });
+      const data = await res.json();
+      if(data.success === false){
+        dispatch(updateUserFailure(data.message))
+        return;
+      }
+      dispatch(updateUsersuccess(data));
+      setupdateSuccess(true);
+    }
+    catch(err){
+      dispatch(updateUserFailure(err.message));
+    }
+  }
   return (
     <div className="container mx-auto mt-10 max-w-md p-6 bg-white rounded shadow">
       <h1 className="text-3xl font-bold text-center mb-6">Profile</h1>
-      <form className="space-y-4">
+      <form className="space-y-4" onSubmit={handleSubmit}>
         <input
         onChange={(e) => setFile(e.target.files[0])}
          type="file" 
@@ -86,11 +120,12 @@ export default function Profile() {
             Username
           </label>
           <input
+            onChange={handleChange}
             type="text"
             id="username"
             className="w-full border rounded px-3 py-2 focus:outline-none focus:ring"
             placeholder="Enter your username"
-            value={currentUser.username}
+            defaultValue={currentUser.username}
           />
         </div>
         <div>
@@ -98,11 +133,12 @@ export default function Profile() {
             Email
           </label>
           <input
+            onChange={handleChange}
             type="email"
             id="email"
             className="w-full border rounded px-3 py-2 focus:outline-none focus:ring"
             placeholder="Enter your email"
-            value={currentUser.email}
+            defaultValue={currentUser.email}
           />
         </div>
         <div>
@@ -110,6 +146,7 @@ export default function Profile() {
             Password
           </label>
           <input
+            onChange={handleChange}
             type="password"
             id="password"
             className="w-full border rounded px-3 py-2 focus:outline-none focus:ring"
@@ -117,11 +154,13 @@ export default function Profile() {
           />
         </div>
         <button
+          disabled={loading}
           type="submit"
           className="w-full  bg-slate-700 text-white py-2 rounded uppercase hover:bg-blue-700"
         >
-          Update Profile
+          {loading ? "Updating..." : "Update Profile"}
         </button>
+        
       </form>
       <div className="flex justify-between mt-5">
         <div className="flex gap-3">
@@ -133,6 +172,12 @@ export default function Profile() {
           </span>
         </div>
       </div>
+      <p>
+        {error && <span className="text-red-500">{error}</span>}
+      </p>
+      <p>
+        {updateSuccess && <span className="text-green-500">Profile updated successfully!</span>}
+      </p>
     </div>
   );
 }
