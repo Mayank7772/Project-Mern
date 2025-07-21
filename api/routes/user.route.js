@@ -7,5 +7,4 @@ const router = express.Router();
 router.get('/test',test);
 router.post('/update/:id',verifyToken,updateUser);
 router.delete('/delete/:id',verifyToken,deleteUser); // Assuming deleteUser is similar to updateUser
-
 module.exports =  router;// This is the user route file where you can define all user-related routes.
