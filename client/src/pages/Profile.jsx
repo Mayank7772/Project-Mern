@@ -20,6 +20,7 @@ import {
   signOutUserSuccess
 } from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
 // Import necessary actions from your Redux slice
 export default function Profile() {
   const { currentUser, loading, error } = useSelector((state) => state.user);
@@ -137,7 +138,7 @@ export default function Profile() {
   return (
     <div className="container mx-auto mt-10 max-w-md p-6 bg-white rounded shadow">
       <h1 className="text-3xl font-bold text-center mb-6">Profile</h1>
-      <form className="space-y-4" onSubmit={handleSubmit}>
+      <form className="space-y-4 flex flex-col" onSubmit={handleSubmit}>
         <input
           onChange={(e) => setFile(e.target.files[0])}
           type="file"
@@ -207,12 +208,20 @@ export default function Profile() {
         <button
           disabled={loading}
           type="submit"
-          className="w-full  bg-slate-700 text-white py-2 rounded uppercase hover:bg-blue-700"
+          className="w-full bg-slate-700 text-white py-2 rounded uppercase hover:bg-blue-700 cursor-pointer"
         >
           {loading ? "Updating..." : "Update Profile"}
         </button>
+        <div 
+        className="flex justify-center  w-full bg-green-700 text-white py-2 rounded uppercase hover:bg-blue-700">
+          <Link 
+              className="cursor-pointer"
+              to={'/create-listing'}>
+              Create Listing
+          </Link>
+        </div>
       </form>
-      <div className="flex justify-between mt-5">
+      <div className="flex justify-between mt-5 ">
         <div className="flex gap-3">
           <span
             onClick={handleDeleteUser}
