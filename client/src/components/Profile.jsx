@@ -1,23 +1,35 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useRef } from "react";
-import {getDownloadURL, getStorage, ref, uploadBytesResumable} from "firebase/storage";
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
 import { app } from "../firebase"; // Adjust the import path as necessary
-import { updateUserStart,updateUsersuccess,updateUserFailure } from "../redux/user/userSlice";
+import {
+  updateUserStart,
+  updateUsersuccess,
+  updateUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
+  deleteUserFailure,
+} from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
 // Import necessary actions from your Redux slice
 export default function Profile() {
-  const { currentUser,loading ,error } = useSelector((state) => state.user);
+  const { currentUser, loading, error } = useSelector((state) => state.user);
   const fileRef = useRef(null);
   const [file, setFile] = useState(undefined);
   const [filePercent, setFilePercent] = useState(0);
   const [fileUploadError, setfileUploadError] = useState(false);
   const [formData, setformData] = useState({});
-  const [updateSuccess , setupdateSuccess] = useState(false);
+  const [updateSuccess, setupdateSuccess] = useState(false);
   const dispatch = useDispatch();
-  
+
   useEffect(() => {
-    if(file){
+    if (file) {
       hadleFileUpload(file);
     }
   }, [file]);
@@ -34,7 +46,8 @@ export default function Profile() {
       "state_changed",
       (snapshot) => {
         // Handle progress, pause, and resume
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         setFilePercent(Math.round(progress));
       },
       (error) => {
@@ -44,75 +57,91 @@ export default function Profile() {
       () => {
         // Handle successful uploads on complete
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-        setformData({...formData , avatar : downloadURL});
+          setformData({ ...formData, avatar: downloadURL });
         });
         console.log("File uploaded successfully");
-      } 
+      }
     );
-  }
+  };
 
-  const handleChange = (e) =>{
-    setformData({...formData , [e.target.id] : e.target.value});
-  }
-
+  const handleChange = (e) => {
+    setformData({ ...formData, [e.target.id]: e.target.value });
+  };
 
   // Function to handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try{
+    try {
       dispatch(updateUserStart());
       const res = await fetch(`/api/user/update/${currentUser._id}`, {
-        method:'POST',
-        headers:{
-          'Content-Type' : 'application/json',
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        body:JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
       const data = await res.json();
-      if(data.success === false){
-        dispatch(updateUserFailure(data.message))
+      if (data.success === false) {
+        dispatch(updateUserFailure(data.message));
         return;
       }
       dispatch(updateUsersuccess(data));
       setupdateSuccess(true);
-    }
-    catch(err){
+    } catch (err) {
       dispatch(updateUserFailure(err.message));
     }
-  }
+  };
+
+  // Function to handle user deletion
+  const handleDeleteUser = async () => {
+    try {
+      dispatch(deleteUserStart());
+      const res = await fetch(`api/user/delete/${currentUser._id}`,{
+        method : 'DELETE',
+      })
+      const data = await res.json();
+      console.log(data);
+      if(data.success === false){
+        dispatch(deleteUserFailure(data.message));
+        return;
+      }
+      dispatch(deleteUserSuccess(data));
+    } 
+    catch (err) {
+      dispatch(deleteUserFailure(err.message));
+    }
+  };
+
   return (
     <div className="container mx-auto mt-10 max-w-md p-6 bg-white rounded shadow">
       <h1 className="text-3xl font-bold text-center mb-6">Profile</h1>
       <form className="space-y-4" onSubmit={handleSubmit}>
         <input
-        onChange={(e) => setFile(e.target.files[0])}
-         type="file" 
-         ref={fileRef} 
-         hidden 
-         accept="image/*" />
+          onChange={(e) => setFile(e.target.files[0])}
+          type="file"
+          ref={fileRef}
+          hidden
+          accept="image/*"
+        />
         <div className="flex flex-col items-center mb-6">
           <img
             onClick={() => fileRef.current.click()}
-            src={formData.avatar ||  currentUser.avatar}
+            src={formData.avatar || currentUser.avatar}
             alt="Avatar"
             className="w-24 h-24 rounded-full mb-4 cursor-pointer"
           />
           <p className="text-sm self-center">
-            {
-              fileUploadError 
-              ?
-              <span className="text-red-500">Error uploading file(image  must be less than 2 mb)</span>
-              :
-              (
-                (filePercent > 0 && filePercent < 100)
-              ? <span className="text-blue-500">Uploading: {filePercent}% </span>
-              : 
-              (
-                filePercent === 100 ? <span className="text-green-500"> Upload complete </span>
-                : ""
-              )
-              )
-             }
+            {fileUploadError ? (
+              <span className="text-red-500">
+                Error uploading file(image must be less than 2 mb)
+              </span>
+            ) : filePercent > 0 && filePercent < 100 ? (
+              <span className="text-blue-500">Uploading: {filePercent}% </span>
+            ) : filePercent === 100 ? (
+              <span className="text-green-500"> Upload complete </span>
+            ) : (
+              ""
+            )}
           </p>
         </div>
         <div>
@@ -160,11 +189,13 @@ export default function Profile() {
         >
           {loading ? "Updating..." : "Update Profile"}
         </button>
-        
       </form>
       <div className="flex justify-between mt-5">
         <div className="flex gap-3">
-          <span className=" bg-red-700  cursor-pointer outline-none rounded p-2">
+          <span
+            onClick={handleDeleteUser}
+            className=" bg-red-700  cursor-pointer outline-none rounded p-2"
+          >
             Delete Account
           </span>
           <span className=" bg-yellow-700  cursor-pointer outline-none rounded p-2">
@@ -172,13 +203,12 @@ export default function Profile() {
           </span>
         </div>
       </div>
+      <p>{error && <span className="text-red-500">{error}</span>}</p>
       <p>
-        {error && <span className="text-red-500">{error}</span>}
-      </p>
-      <p>
-        {updateSuccess && <span className="text-green-500">Profile updated successfully!</span>}
+        {updateSuccess && (
+          <span className="text-green-500">Profile updated successfully!</span>
+        )}
       </p>
     </div>
   );
 }
-
