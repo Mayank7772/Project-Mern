@@ -5,7 +5,7 @@ dotenv.config();
 
 const userRoute = require('./routes/user.route');
 const authRoute = require('./routes/auth.route');
-
+const listingRoute = require('./routes/listing.route') ;
 const cookieParser = require('cookie-parser');
 
 // Connect to MongoDB
@@ -28,6 +28,7 @@ app.listen(3000, () => {
 
 app.use('/api/user', userRoute);
 app.use('/api/auth', authRoute);
+app.use('/api/listing',listingRoute);
 
 
 //middleware for handling errors
