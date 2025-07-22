@@ -17,7 +17,7 @@ import {
   deleteUserFailure,
   signOutUserFailure,
   signOutUserStart,
-  signOutUserSuccess
+  signOutUserSuccess,
 } from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
@@ -102,42 +102,40 @@ export default function Profile() {
   const handleDeleteUser = async () => {
     try {
       dispatch(deleteUserStart());
-      const res = await fetch(`api/user/delete/${currentUser._id}`,{
-        method : 'DELETE',
-      })
+      const res = await fetch(`api/user/delete/${currentUser._id}`, {
+        method: "DELETE",
+      });
       const data = await res.json();
       console.log(data);
-      if(data.success === false){
+      if (data.success === false) {
         dispatch(deleteUserFailure(data.message));
         return;
       }
       dispatch(deleteUserSuccess(data));
-    } 
-    catch (err) {
+    } catch (err) {
       dispatch(deleteUserFailure(err.message));
     }
   };
 
   //singOut
-  const handleSignOut = async() =>{
-  try{
-    dispatch(signOutUserStart());
-    const res = await fetch('/api/auth/signout');
-    const data = res.json();
-    console.log(data);
-    if(data.success === false){
+  const handleSignOut = async () => {
+    try {
+      dispatch(signOutUserStart());
+      const res = await fetch("/api/auth/signout");
+      const data = res.json();
+      console.log(data);
+      if (data.success === false) {
+        dispatch(signOutUserFailure(data.message));
+        return;
+      }
+      dispatch(signOutUserSuccess(data));
+    } catch (error) {
       dispatch(signOutUserFailure(data.message));
-      return;
     }
-    dispatch(signOutUserSuccess(data));
-  }
-  catch(error){
-      dispatch(signOutUserFailure(data.message));
-  }
-  }
+  };
 
   // show user listings
-  const handleShowListings = async() => {
+  const handleShowListings = async () => {
     try {
       setShowListingsError(false);
       const res = await fetch(`/api/user/listings/${currentUser._id}`);
@@ -147,31 +145,31 @@ export default function Profile() {
         return;
       }
       setUserListings(data);
-    }catch (error) {
+    } catch (error) {
       setShowListingsError(true);
     }
-  }
-
+  };
 
   const handleDeleteListing = async (listingId) => {
     try {
-      const res = await fetch(`/api/listing/delete/${listingId}`,{
-        method : 'DELETE',
-      })
+      const res = await fetch(`/api/listing/delete/${listingId}`, {
+        method: "DELETE",
+      });
       const data = await res.json();
       if (data.success === false) {
         console.log(data);
         return;
       }
-      setUserListings(userListings.filter((listing) => listing._id!== listingId));
+      setUserListings(
+        userListings.filter((listing) => listing._id !== listingId)
+      );
     } catch (error) {
-      
+      console.log(error);
     }
-  }
+  };
 
-
-  return ( 
-    <div className="container mx-auto mt-10 max-w-lg p-6 bg-white rounded shadow">
+  return (
+    <div className="container mx-auto mt-10 max-w-md p-6 bg-white rounded shadow">
       <h1 className="text-3xl font-bold text-center mb-6">Profile</h1>
       <form className="space-y-4 flex flex-col" onSubmit={handleSubmit}>
         <input
@@ -247,12 +245,9 @@ export default function Profile() {
         >
           {loading ? "Updating..." : "Update Profile"}
         </button>
-        <div 
-        className="flex justify-center  w-full bg-green-700 text-white py-2 rounded uppercase hover:bg-blue-700">
-          <Link 
-              className="cursor-pointer"
-              to={'/create-listing'}>
-              Create Listing
+        <div className="flex justify-center  w-full bg-green-700 text-white py-2 rounded uppercase hover:bg-blue-700">
+          <Link className="cursor-pointer" to={"/create-listing"}>
+            Create Listing
           </Link>
         </div>
       </form>
@@ -264,9 +259,10 @@ export default function Profile() {
           >
             Delete Account
           </span>
-          <span 
-          onClick={handleSignOut}
-          className=" bg-yellow-700  cursor-pointer outline-none rounded p-2">
+          <span
+            onClick={handleSignOut}
+            className=" bg-yellow-700  cursor-pointer outline-none rounded p-2"
+          >
             Sign Out
           </span>
         </div>
@@ -278,65 +274,67 @@ export default function Profile() {
         )}
       </p>
 
-        <div className="max-w-5xl mx-auto p-6 space-y-6">
-      <button
-        onClick={handleShowListings}
-        className="w-full py-3 bg-green-100 text-green-700 font-semibold rounded-lg hover:bg-green-200 transition"
-      >
-        Show Listings
-      </button>
+      <div className="max-w-5xl mx-auto p-6 space-y-6">
+        <button
+          onClick={handleShowListings}
+          className="w-full py-3 bg-green-100 text-green-700 font-semibold rounded-lg hover:bg-green-200 transition"
+        >
+          Show Listings
+        </button>
 
-      {showListingsError && (
-        <p className="text-center text-red-500">Error fetching listings</p>
-      )}
+        {showListingsError && (
+          <p className="text-center text-red-500">Error fetching listings</p>
+        )}
 
-      {userListings && userListings.length > 0 && (
-        <div className="grid grid-cols-1  gap-6">
-          {userListings.map((listing) => (
-            <div
-              key={listing._id}
-              className="bg-white rounded-2xl shadow-md overflow-hidden flex flex-col"
-            >
-              <Link to={`/listing/${listing._id}`}>
-                <img
-                  src={listing.imageUrls[0]}
-                  alt="Listing cover"
-                  className="h-48 w-full object-cover"
-                />
-              </Link>
-              <div className="p-4 flex-1 flex flex-col justify-between">
-                <div>
-                  <Link to={`/listing/${listing._id}`}>
-                    <h3 className="text-lg font-semibold hover:text-blue-600 transition">
-                      {listing.name}
-                    </h3>
-                  </Link>
-                  <p className="text-sm text-gray-500">{listing.address}</p>
-                  <p className="mt-1 text-sm text-gray-700 font-medium">
-                    ${listing.regularPrice}
-                  </p>
-                </div>
-                <div className="mt-4 flex justify-between">
-                  <button
-                    type="button"
-                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-sm font-medium"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteListing(listing._id)}
-                    type="button"
-                    className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition text-sm font-medium"
-                  >
-                    Delete
-                  </button>
+        {userListings && userListings.length > 0 && (
+          <div className="grid grid-cols-1  gap-6">
+            {userListings.map((listing) => (
+              <div
+                key={listing._id}
+                className="bg-white rounded-2xl shadow-md overflow-hidden flex flex-col"
+              >
+                <Link to={`/listing/${listing._id}`}>
+                  <img
+                    src={listing.imageUrls[0]}
+                    alt="Listing cover"
+                    className="h-48 w-full object-cover"
+                  />
+                </Link>
+                <div className="p-4 flex-1 flex flex-col justify-between">
+                  <div>
+                    <Link to={`/listing/${listing._id}`}>
+                      <h3 className="text-lg font-semibold hover:text-blue-600 transition">
+                        {listing.name}
+                      </h3>
+                    </Link>
+                    <p className="text-sm text-gray-500">{listing.address}</p>
+                    <p className="mt-1 text-sm text-gray-700 font-medium">
+                      ${listing.regularPrice}
+                    </p>
+                  </div>
+                  <div className="mt-4 flex justify-between">
+                    <Link to={`/update-listing/${listing._id}`}>
+                    <button
+                      type="button"
+                      className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-sm font-medium cursor-pointer"
+                    >
+                      Edit
+                    </button>
+                    </Link>
+                    <button
+                      onClick={() => handleDeleteListing(listing._id)}
+                      type="button"
+                      className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition text-sm font-medium"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
