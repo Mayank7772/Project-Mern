@@ -171,7 +171,7 @@ export default function Profile() {
 
 
   return ( 
-    <div className="container mx-auto mt-10 max-w-md p-6 bg-white rounded shadow">
+    <div className="container mx-auto mt-10 max-w-lg p-6 bg-white rounded shadow">
       <h1 className="text-3xl font-bold text-center mb-6">Profile</h1>
       <form className="space-y-4 flex flex-col" onSubmit={handleSubmit}>
         <input
@@ -291,7 +291,7 @@ export default function Profile() {
       )}
 
       {userListings && userListings.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1  gap-6">
           {userListings.map((listing) => (
             <div
               key={listing._id}
