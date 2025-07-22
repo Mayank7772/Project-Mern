@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const { errorHandler } = require('../utils/error');
 const { User } = require('../models/user.model');
+const { Listing } = require('../models/listing.model');
 
 const test = (req, res) => {
     console.log('hello route');
@@ -44,5 +45,19 @@ const deleteUser = async (req, res, next) => {
     }
 }
 
+const getUserListings = async (req, res, next) => {
+    if(req.user.id === req.params.id){
+        try {
+            const listings = await Listing.find({userRef: req.params.id});
+            res.status(200).json(listings);
+        } catch (error) {
+            next(error);
+        }
+    }
+    else{
+        return next(errorHandler(401, "You are not authorized to view this user's listings!"));
+    }
+}
 
-module.exports = {test, updateUser , deleteUser}; // Exporting the functions to be used in the route file
+
+module.exports = {test, updateUser , deleteUser , getUserListings}; // Exporting the functions to be used in the route file
