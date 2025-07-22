@@ -59,5 +59,16 @@ const getUserListings = async (req, res, next) => {
     }
 }
 
+const getUser = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if(!user) return next(errorHandler(404, "User not found!"));
+        const {password,...rest} = user._doc; 
+        res.status(200).json(rest);
+    } catch (error) {
+        next(error);
+    }
+}
 
-module.exports = {test, updateUser , deleteUser , getUserListings}; // Exporting the functions to be used in the route file
+
+module.exports = {test, updateUser , deleteUser , getUserListings , getUser}; // Exporting the functions to be used in the route file

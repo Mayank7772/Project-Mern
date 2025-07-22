@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
@@ -7,13 +7,14 @@ import 'swiper/css/pagination';
 import { Navigation, Pagination } from 'swiper/modules';
 import { FaBed, FaBath, FaParking, FaChair, FaMapMarkerAlt } from 'react-icons/fa';
 import { MdOutlineLocalOffer } from 'react-icons/md';
+import ContactOwner from './ContactOwner';
 
 const Listing = () => {
   const { id } = useParams();
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
+  
   useEffect(() => {
     const fetchListing = async () => {
       try {
@@ -100,14 +101,7 @@ const Listing = () => {
 
       {/* Contact Form */}
       <div className="mt-6">
-        <label htmlFor="message" className="block mb-2">Contact Owner</label>
-        <textarea
-          id="message"
-          placeholder="Enter your message here..."
-          className="w-full border border-gray-300 rounded-lg p-3 resize-none"
-          rows={3}
-        />
-        <button className="mt-2 w-full bg-blue-600 text-white py-2 rounded-lg">Send Message</button>
+        <ContactOwner listing={listing}/>
       </div>
     </main>
   );
