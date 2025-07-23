@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaBath, FaBed, FaMapMarkerAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import ListingItem from "../components/ListingItem";
 const Search = () => {
   const [sidebardata, setSidebardata] = useState({
     searchTerm: "",
@@ -16,8 +17,7 @@ const Search = () => {
 
   const navigate = useNavigate();
 
-  console.log("Sidebar Data:", sidebardata);
-  console.log("Listings:", listings);
+  
 
   // Function to handle input change event in the sidebar filters
   const handleChange = (e) => {
@@ -110,6 +110,7 @@ const Search = () => {
     fetchListings();
 
   }, [location.search]);
+
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -256,38 +257,15 @@ const Search = () => {
         {/* Results */}
         <section className="lg:col-span-3 space-y-6">
           <h2 className="text-2xl font-semibold">Listing results:</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Example Card 1 */}
-            <div className="bg-white rounded-2xl shadow-md overflow-hidden">
-              <img
-                src="https://picsum.photos/id/1018/400/250"
-                alt="Example"
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4 space-y-2">
-                <h3 className="text-lg font-medium">Beautiful Home</h3>
-                <div className="flex items-center text-gray-600 text-sm">
-                  <FaMapMarkerAlt className="mr-1" />
-                  <span>123 Maple Avenue</span>
-                </div>
-                <p className="text-gray-700">
-                  Cozy modern house in a quiet neighborhood.
-                </p>
-                <div className="flex items-center justify-between text-gray-800 font-semibold">
-                  <span>$400 / month</span>
-                  <div className="flex space-x-4">
-                    <span className="flex items-center">
-                      <FaBed className="mr-1" /> 3
-                    </span>
-                    <span className="flex items-center">
-                      <FaBath className="mr-1" /> 2
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* Additional cards can be mapped here... */}
-          </div>
+            {loading && <p>Loading...</p>  }
+            {!loading && listings.length > 0 ?
+                listings.map((listing,index) => (
+                    <div key={index}  className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition">
+                      <ListingItem listing={listing}/> 
+                    </div>
+                ))
+                : <p>No results found.</p>
+            }
         </section>
       </div>
     </div>
